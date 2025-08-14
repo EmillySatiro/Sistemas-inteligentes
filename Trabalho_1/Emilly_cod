@@ -49,7 +49,7 @@ for i in range(quant_obstaculos):
             continue 
         
         # se ela conlide com algum outro obstaculo 
-        if any(calcular_distancia(novo_centro,obstaculo) < 2*raio for obstaculo in mapa_obstaculos): 
+        if any(calcular_distancia(novo_centro,obstaculo) < 3*raio for obstaculo in mapa_obstaculos): 
             continue
         
         mapa_obstaculos.append(novo_centro)
