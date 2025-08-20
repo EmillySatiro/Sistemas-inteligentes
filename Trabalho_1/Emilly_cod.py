@@ -24,6 +24,7 @@ ax.set_ylim(0, Tamanho_do_plano)
 ax.set_aspect('equal')
 ax.set_facecolor("black")  
 
+
 # plano cartesiano (as retas do eixo)
 ax.grid(color='gray', linestyle='--', alpha=0.3)
 ax.axhline(0, color='white', linewidth=0.5)
@@ -35,7 +36,6 @@ estrelas_x = [random.uniform(0, Tamanho_do_plano) for _ in range(num_estrelas)]
 estrelas_y = [random.uniform(0, Tamanho_do_plano) for _ in range(num_estrelas)]
 ax.scatter(estrelas_x, estrelas_y, s=2, color='white', alpha=0.8)
 
-ax.axis('off') 
 
 # o pontos inicial e final são fixos (um obstaculo não deve sobrepor esse pontos)
 ax.plot(ponto_inico[0], ponto_inico[1], 'go', markersize=10, label='Início')
@@ -44,9 +44,7 @@ ax.plot(ponto_fim[0], ponto_fim[1], 'ro', markersize=10, label='Fim')
 cores_planetas = ['blue', 'orange', 'cyan', 'magenta', 'red', 'green']
 
 def encerrar_com_mensagem(mensagem, cor='red'):
-    ax.clear()
-    ax.set_facecolor("black")
-    ax.text(0.5, 0.5, mensagem, ha='center', va='center', fontsize=10, color=cor, transform=ax.transAxes)
+    ax.text(0.5, 0.5, mensagem, ha='center', va='center', fontsize=16, color=cor, transform=ax.transAxes)
     plt.draw()
     plt.show(block=True)
     sys.exit()
@@ -63,7 +61,7 @@ for i in range(quant_obstaculos):
         tentativas += 1
 
         if tentativas >= 1000:
-            encerrar_com_mensagem("Não há mais espaço para planetas aqui!", cor='red')
+            encerrar_com_mensagem("Não há mais espaço!", cor='red')
 
         x = random.uniform(raio, Tamanho_do_plano - raio)
         y = random.uniform(raio, Tamanho_do_plano - raio)
@@ -82,6 +80,6 @@ for i in range(quant_obstaculos):
     cor_planeta = random.choice(cores_planetas)
     circulo = plt.Circle(novo_centro, raio, color=cor_planeta, alpha=0.7)
     ax.add_patch(circulo)
-    plt.pause(0.2)  
+    plt.pause(0.25)  
 
-encerrar_com_mensagem("Todos os planetas foram posicionados com sucesso!", cor='lime')
+encerrar_com_mensagem("Todos os planetas foram posicionados!", cor='lime')
