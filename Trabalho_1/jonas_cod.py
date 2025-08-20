@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
 
 MIN = 0
-MAX = 1000
+MAX = 10
 
 PONTO_INI = (MIN,MIN)
 PONTO_FIM = (MAX,MAX)
 
-QTD_OBSTACULO = 50
-RAIO_OBSTACULO = 25
+QTD_OBSTACULO = 10
+RAIO_OBSTACULO = 2
 
 pontos_usados = [PONTO_INI,PONTO_FIM]
 pontos_nao_pode = [PONTO_INI,PONTO_FIM]
@@ -65,7 +65,10 @@ def plotar_grafico():
     plt.show()
 
 if __name__ == '__main__':
-    gerar_posicao()
-    print(pontos_usados)
-    print(len(pontos_usados))
-    plotar_grafico()
+    if (((RAIO_OBSTACULO ** 2)) * QTD_OBSTACULO) > ((MAX*MAX) * 0.15):
+        print("Tamanho nao suficiente, reduzindo a quantidade de obstaculos")
+    else:
+        gerar_posicao()
+        print(pontos_usados)
+        print(len(pontos_usados))
+        plotar_grafico()
