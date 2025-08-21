@@ -14,6 +14,7 @@ PONTO_INICIO = (0,0)
 PONTO_FIM = (TAMANHO_DO_PLANO,TAMANHO_DO_PLANO)
 
 mapa_obstaculos = []
+arestas_globais = []
 
 def encerrar_com_mensagem(ax,mensagem, cor='red'):
     ax.text(0.5, 0.5, mensagem, ha='center', va='center', fontsize=16, color=cor, transform=ax.transAxes)
@@ -83,8 +84,6 @@ def gerar_arestas():
         if len(obstaculo) == 2:  # Se ainda não tem arestas
             mapa_obstaculos[i] = (obstaculo[0], obstaculo[1], [])
     
-    arestas_globais = []  # Para arestas do início/fim
-    
     # Arestas do início aos pontos laterais
     for obstaculo in mapa_obstaculos:
         for ponto_lateral in obstaculo[1]:
@@ -115,10 +114,8 @@ def gerar_arestas():
     if reta_livre_de_obstaculos(PONTO_INICIO, PONTO_FIM, mapa_obstaculos, RAIO):
         aresta = (PONTO_INICIO, PONTO_FIM, 'purple', '-')
         arestas_globais.append(aresta)
-    
-    return arestas_globais
 
-def plotar_arestas(ax, arestas_globais):
+def plotar_arestas(ax):
     # Plota arestas globais (início/fim)
     for aresta in arestas_globais:
         ponto_a, ponto_b, cor, estilo = aresta
@@ -132,10 +129,6 @@ def plotar_arestas(ax, arestas_globais):
                 ponto_a, ponto_b, cor, estilo = aresta
                 ax.plot([ponto_a[0], ponto_b[0]], [ponto_a[1], ponto_b[1]], 
                         color=cor, linestyle=estilo, alpha=0.2)
-
-def posicionar_arestas():
-    # Apenas gera as arestas, não desenha
-    return gerar_arestas()
 
 def inicializar_plot():
     fig, ax = plt.subplots()
@@ -164,7 +157,7 @@ def gerar_obstaculo_existente(novo_centro):
     return False
 
 def posicionar_obstaculos():
-    for i in range(QUANT_OBSTACULOS):
+    for _ in range(QUANT_OBSTACULOS):
         tentativas = 0
         while True:
             tentativas += 1
@@ -190,17 +183,15 @@ def plotar_obstaculos():
             ax.plot(ponto[0], ponto[1], 'o', markersize=2, color="black")
         ax.add_patch(circulo)
     
-    # Gera e plota as arestas
-    arestas_globais = posicionar_arestas()
-    plotar_arestas(ax, arestas_globais)
+    plotar_arestas(ax)
     
     plt.title('Mapa de Obstáculos')
     plt.show()
 
 def main():
     posicionar_obstaculos()
+    gerar_arestas()
     print(f"Posicionados {len(mapa_obstaculos)} obstáculos")
-    # print(mapa_obstaculos)
     plotar_obstaculos()
 
 if __name__ == "__main__":
