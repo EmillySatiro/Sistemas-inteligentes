@@ -41,6 +41,32 @@ def calcular_distancia_reta(r_a, r_b, r_c, c_x, c_y):
     baixo = math.sqrt((r_a ** 2) + (r_b ** 2))
     return cima / baixo
 
+
+def gerar_obstaculo_existente(novo_centro):
+    if calcular_distancia(novo_centro, PONTO_INICIO) < RAIO:
+        return True
+    if calcular_distancia(novo_centro, PONTO_FIM) < RAIO:
+        return True
+    if any(not verifica_intervalo(novo_centro, obstaculo[0]) for obstaculo in mapa_obstaculos):
+        return True
+    return False
+
+def posicionar_obstaculos():
+    for _ in range(QUANT_OBSTACULOS):
+        tentativas = 0
+        while True:
+            tentativas += 1
+            if tentativas >= 1000:
+                print(f"Não há mais espaço! Foram posicionados {len(mapa_obstaculos)} obstáculos.")
+                return  # Sai do posicionamento, mas mantém os já posicionados
+            x = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
+            y = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
+            novo_centro = (x, y)
+            if gerar_obstaculo_existente(novo_centro):
+                continue
+            mapa_obstaculos.append((novo_centro, calcular_laterais(novo_centro)))
+            break
+
 def reta_livre_de_obstaculos(A, B, mapa_obstaculos, raio):
     for obstaculo in mapa_obstaculos:
         centro = obstaculo[0]
@@ -115,20 +141,6 @@ def gerar_arestas():
         aresta = (PONTO_INICIO, PONTO_FIM, 'purple', '-')
         arestas_globais.append(aresta)
 
-def plotar_arestas(ax):
-    # Plota arestas globais (início/fim)
-    for aresta in arestas_globais:
-        ponto_a, ponto_b, cor, estilo = aresta
-        ax.plot([ponto_a[0], ponto_b[0]], [ponto_a[1], ponto_b[1]], 
-                color=cor, linestyle=estilo, alpha=0.7)
-    
-    # Plota arestas dos obstáculos
-    for obstaculo in mapa_obstaculos:
-        if len(obstaculo) > 2:  # Se tem arestas
-            for aresta in obstaculo[2]:
-                ponto_a, ponto_b, cor, estilo = aresta
-                ax.plot([ponto_a[0], ponto_b[0]], [ponto_a[1], ponto_b[1]], 
-                        color=cor, linestyle=estilo, alpha=0.2)
 
 def inicializar_plot():
     fig, ax = plt.subplots()
@@ -147,31 +159,6 @@ def inicializar_plot():
     
     return fig, ax
 
-def gerar_obstaculo_existente(novo_centro):
-    if calcular_distancia(novo_centro, PONTO_INICIO) < RAIO:
-        return True
-    if calcular_distancia(novo_centro, PONTO_FIM) < RAIO:
-        return True
-    if any(not verifica_intervalo(novo_centro, obstaculo[0]) for obstaculo in mapa_obstaculos):
-        return True
-    return False
-
-def posicionar_obstaculos():
-    for _ in range(QUANT_OBSTACULOS):
-        tentativas = 0
-        while True:
-            tentativas += 1
-            if tentativas >= 1000:
-                print(f"Não há mais espaço! Foram posicionados {len(mapa_obstaculos)} obstáculos.")
-                return  # Sai do posicionamento, mas mantém os já posicionados
-            x = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
-            y = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
-            novo_centro = (x, y)
-            if gerar_obstaculo_existente(novo_centro):
-                continue
-            mapa_obstaculos.append((novo_centro, calcular_laterais(novo_centro)))
-            break
-
 def plotar_obstaculos():
     # Inicializa o plot com início e fim
     _,ax = inicializar_plot()
@@ -187,6 +174,22 @@ def plotar_obstaculos():
     
     plt.title('Mapa de Obstáculos')
     plt.show()
+
+def plotar_arestas(ax):
+    # Plota arestas globais (início/fim)
+    for aresta in arestas_globais:
+        ponto_a, ponto_b, cor, estilo = aresta
+        ax.plot([ponto_a[0], ponto_b[0]], [ponto_a[1], ponto_b[1]], 
+                color=cor, linestyle=estilo, alpha=0.7)
+    
+    # Plota arestas dos obstáculos
+    for obstaculo in mapa_obstaculos:
+        if len(obstaculo) > 2:  # Se tem arestas
+            for aresta in obstaculo[2]:
+                ponto_a, ponto_b, cor, estilo = aresta
+                ax.plot([ponto_a[0], ponto_b[0]], [ponto_a[1], ponto_b[1]], 
+                        color=cor, linestyle=estilo, alpha=0.2)
+
 
 def main():
     posicionar_obstaculos()
