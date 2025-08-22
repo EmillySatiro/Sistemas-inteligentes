@@ -1,1 +1,0 @@
-arestas_globais
