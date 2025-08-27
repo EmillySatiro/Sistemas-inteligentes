@@ -7,7 +7,7 @@ import sys
 
 # Parametros 
 TAMANHO_DO_PLANO = 10000
-QUANT_OBSTACULOS = 50
+QUANT_OBSTACULOS = 10
 RAIO = 600
 
 PONTO_INICIO = (0,0)
@@ -161,6 +161,11 @@ if __name__ == "__main__":
             todos_pontos.append(p)
             pontos_circulo_idx.append(idx)
 
+    todos_pontos.append(PONTO_INICIO)
+    pontos_circulo_idx.append(-1)  # índice especial só pra marcar que não é de círculo
+    todos_pontos.append(PONTO_FIM)
+    pontos_circulo_idx.append(-1)
+
     arestas_qtd = 0
     for i in range(len(todos_pontos)):
         for j in range(i+1, len(todos_pontos)):
@@ -181,4 +186,3 @@ if __name__ == "__main__":
     print(f"Arestas válidas desenhadas: {arestas_qtd}")
 
     encerrar_com_mensagem("Todos os planetas foram posicionados!", cor='lime', sem_espaço=sem_espaço)
-
