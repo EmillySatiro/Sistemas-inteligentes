@@ -36,7 +36,6 @@ def encerrar_com_mensagem(mensagem, cor=None, finalizar=True, sem_espaço=None):
         plt.show(block=True)
         sys.exit()
 
-
 def calcular_distancia(ponto1, ponto2): 
     return math.sqrt((ponto1[0] - ponto2[0])**2 + (ponto1[1] - ponto2[1])**2) #  é a formula Euclidiana basicamente,  melhor forma pelo que eu vi ( a outra que eu tenti ainda tinha sobreposição na diagonal )
 

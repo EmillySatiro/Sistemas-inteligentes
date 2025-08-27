@@ -59,8 +59,8 @@ def posicionar_obstaculos():
             if tentativas >= 1000:
                 print(f"Não há mais espaço! Foram posicionados {len(mapa_obstaculos)} obstáculos.")
                 return  # Sai do posicionamento, mas mantém os já posicionados
-            x = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
-            y = random.randint(RAIO, TAMANHO_DO_PLANO - RAIO)
+            x = random.uniform(RAIO, TAMANHO_DO_PLANO - RAIO)
+            y = random.uniform(RAIO, TAMANHO_DO_PLANO - RAIO)
             novo_centro = (x, y)
             if gerar_obstaculo_existente(novo_centro):
                 continue
