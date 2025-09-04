@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import random
 import math
 import sys
+import numpy as np
+from matplotlib.patches import Arc
 
 # Parametros 
 TAMANHO_DO_PLANO = 10000
@@ -85,11 +87,57 @@ def segmento_entra_no_circulo(A, B, centro, raio, eps=1e-9, permitir_tangencia=T
         return d <= (raio + eps)
 
 def colisao_com_obstaculos_interior(A, B, mapa):
-    # True se o interior do segmento AB entra no interior de QUALQUER circulo do mapa.
+    """True se o interior do segmento AB entra no interior de QUALQUER circulo do mapa."""
     for centro, _ in mapa:
         if segmento_entra_no_circulo(A, B, centro, RAIO):
             return True
     return False
+
+def encontrar_possibilidades(dict_caminhos, ponto_inicial, ponto_final):
+    """Busca DFS iterativa para encontrar caminho do ponto inicial ao final."""
+    stack = [(ponto_inicial, [ponto_inicial])]
+    visited = set()
+    
+    while stack:
+        current, path = stack.pop()
+        
+        if current in visited:
+            continue
+        visited.add(current)
+        
+        if current == ponto_final:
+            return path
+            
+        # Adiciona vizinhos à pilha
+        for neighbor in dict_caminhos.get(current, []):
+            if neighbor not in visited:
+                stack.append((neighbor, path + [neighbor]))
+    
+    return None
+
+def ponto_mesmo_centroid(ponto1, ponto2, centroids, raio_size):
+    """Verifica se ambos os pontos pertencem ao mesmo centróide."""
+    centroid_ponto1 = None
+    centroid_ponto2 = None
+    eps = 1e-6
+
+    # procura centróide para ponto1
+    for i, centroid in enumerate(centroids):
+        if calcular_distancia(ponto1, centroid) <= raio_size + eps:
+            centroid_ponto1 = i
+            break
+
+    # procura centróide para ponto2
+    for i, centroid in enumerate(centroids):
+        if calcular_distancia(ponto2, centroid) <= raio_size + eps:
+            centroid_ponto2 = i
+            break
+
+    # se ambos pertencem ao mesmo centróide (mesmo índice), retorna True
+    if centroid_ponto1 is not None and centroid_ponto2 is not None and centroid_ponto1 == centroid_ponto2:
+        return True, centroids[centroid_ponto1], centroid_ponto1
+
+    return False, None, None
 
 #criação dos obstaculos 
 # - cada obstaculo é um circulo de raio fixo (já defini la em cima )
@@ -99,7 +147,7 @@ def colisao_com_obstaculos_interior(A, B, mapa):
 
 if __name__ == "__main__":
     sem_espaço = 0
-    # plotando o fundo(lembra de que um obstaculo tbm não deve fica em partes fora da borda ou seja tenho que gerar inteiro dentro das bordas)
+    # plotando o fundo(lembra de que um obstaculo tbm não deve sobrepor esse pontos)
     fig, ax = plt.subplots()
     ax.set_xlim(0, TAMANHO_DO_PLANO)
     ax.set_ylim(0, TAMANHO_DO_PLANO)
@@ -165,6 +213,8 @@ if __name__ == "__main__":
     todos_pontos.append(PONTO_FIM)
     pontos_circulo_idx.append(-1)
 
+    # Coletar todas as arestas válidas e desenhá-las (linhas finas azuis)
+    retas = []
     arestas_qtd = 0
     for i in range(len(todos_pontos)):
         for j in range(i+1, len(todos_pontos)):
@@ -179,9 +229,98 @@ if __name__ == "__main__":
                 continue
 
             # se chegou aqui, é uma aresta válida
-            ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-', linewidth=0.5)
+            retas.append((p1, p2))
+            # desenha cada aresta válida em azul fino
+            ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color='blue', linewidth=0.5, alpha=0.6)
             arestas_qtd += 1
 
-    print(f"Arestas válidas desenhadas: {arestas_qtd}")
+    print(f"Arestas válidas encontradas: {arestas_qtd}")
 
-    encerrar_com_mensagem("Todos os planetas foram posicionados!", cor='lime', sem_espaço=sem_espaço)
+    # Adicionar também as arestas internas ligando laterais de cada obstáculo (diagonais)
+    # posicoes_centroides: lista de tuples (cima, baixo, direito, esquerdo)
+    posicoes_centroides = [obst[1] for obst in mapa_obstaculos]
+    for (cima, baixo, direito, esquerdo) in posicoes_centroides:
+        # ligações diagonais dentro do mesmo círculo (não cruzam interior porque são na borda)
+        retas.append((cima, esquerdo))
+        retas.append((cima, direito))
+        retas.append((baixo, esquerdo))
+        retas.append((baixo, direito))
+
+    # Construir grafo de conectividade bidirecionalmente
+    dict_caminhos = {}
+
+    # Inicializa todos os pontos no dicionário
+    for obstaculo in mapa_obstaculos:
+        for ponto_lateral in obstaculo[1]:
+            dict_caminhos[ponto_lateral] = []
+    dict_caminhos[PONTO_INICIO] = []
+    dict_caminhos[PONTO_FIM] = []
+
+    # Adiciona todas as arestas válidas (incluindo as internas dos obstáculos)
+    for aresta in retas:
+        ponto_a, ponto_b = aresta[0], aresta[1]
+        # Adiciona conexão bidirecional
+        if ponto_a in dict_caminhos and ponto_b in dict_caminhos:
+            dict_caminhos[ponto_a].append(ponto_b)
+            dict_caminhos[ponto_b].append(ponto_a)
+
+
+
+    for key, value in dict_caminhos.items():
+        print(f"Reta: {key}, Pontos: {value}")
+
+    # Buscar caminho do início ao fim
+    ponto_inicial = PONTO_INICIO
+    ponto_final = PONTO_FIM
+
+    caminho_encontrado = encontrar_possibilidades(dict_caminhos, ponto_inicial, ponto_final)
+    
+    if caminho_encontrado:
+        print(f"Caminho encontrado com {len(caminho_encontrado)} pontos!")
+        print("Caminho:", caminho_encontrado)
+        
+        # Lista dos centros dos obstáculos para verificar se pontos pertencem ao mesmo obstáculo
+        centroids = [centro for centro, _ in mapa_obstaculos]
+        raio_size = RAIO
+        
+        # Desenhar o caminho encontrado
+        for i in range(len(caminho_encontrado) - 1):
+            ponto1 = caminho_encontrado[i]
+            ponto2 = caminho_encontrado[i + 1]
+
+            mesmo_centro, centroid, _ = ponto_mesmo_centroid(ponto1, ponto2, centroids, raio_size)
+            if mesmo_centro:
+                # Desenhar arco ao redor do obstáculo: escolher o arco MAIS CURTO entre angulos
+                angulo1 = np.degrees(np.arctan2(ponto1[1] - centroid[1], ponto1[0] - centroid[0]))
+                angulo2 = np.degrees(np.arctan2(ponto2[1] - centroid[1], ponto2[0] - centroid[0]))
+
+                # Normaliza para [0,360)
+                a1 = angulo1 % 360
+                a2 = angulo2 % 360
+
+                # Diferença no sentido CCW de a1->a2
+                diff = (a2 - a1) % 360
+
+                # Se diff <= 180, o arco CCW de a1 até a2 é o menor; caso contrário, invertemos
+                if diff <= 180:
+                    theta1, theta2 = a1, a2
+                else:
+                    theta1, theta2 = a2, a1
+
+                arco = Arc(centroid, width=2*raio_size, height=2*raio_size,
+                          theta1=theta1, theta2=theta2, color="green", linewidth=3, zorder=5)
+                ax.add_patch(arco)
+            else:
+                # Desenhar linha reta entre obstáculos
+                ax.plot([ponto1[0], ponto2[0]], [ponto1[1], ponto2[1]], 
+                       color='red', linewidth=3, label='Caminho' if i == 0 else "")
+        
+        # Destacar pontos do caminho
+        for ponto in caminho_encontrado:
+            ax.plot(ponto[0], ponto[1], 'yo', markersize=6, markeredgecolor='black', markeredgewidth=1)
+        
+        ax.legend()
+        encerrar_com_mensagem("Caminho encontrado!", cor='lime', sem_espaço=sem_espaço)
+    else:
+        print("Nenhum caminho encontrado!")
+        encerrar_com_mensagem("Nenhum caminho encontrado!", cor='red', sem_espaço=sem_espaço)
